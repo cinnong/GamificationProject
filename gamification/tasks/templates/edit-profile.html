@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Profil Pengguna</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-gray-900 text-white p-10">
+    <h1 class="text-4xl font-bold">Profil Pengguna</h1>
+    <p class="mt-4">👤 Username: {{ profile.user.username }}</p>
+    <p>⭐ Level: {{ profile.level }}</p>
+    <p>🎯 EXP: {{ profile.exp }}</p>
+
+    <!-- Button Edit Profil -->
+    <button
+      onclick="document.getElementById('editProfileForm').classList.toggle('hidden')"
+      class="mt-4 bg-blue-500 px-6 py-3 rounded-lg text-white hover:bg-blue-600 transition duration-300"
+    >
+      ✏️ Edit Profil
+    </button>
+
+    <!-- Form Edit Profil (Hidden secara default) -->
+    <form
+      method="POST"
+      enctype="multipart/form-data"
+      id="editProfileForm"
+      class="mt-6 hidden p-6 bg-gray-800 rounded-lg"
+    >
+      {% csrf_token %}
+      <label class="block mb-2 text-white">Bio:</label>
+      {{ form.bio }}
+
+      <label class="block mt-4 mb-2 text-white">Foto Profil:</label>
+      {{ form.profile_picture }}
+
+      <button
+        type="submit"
+        class="mt-4 bg-green-500 px-6 py-3 rounded-lg text-white hover:bg-green-600 transition duration-300"
+      >
+        Simpan Perubahan
+      </button>
+    </form>
+
+    <!-- Tombol Logout -->
+    <a
+      href="{% url 'logout' %}"
+      class="mt-6 inline-block bg-red-500 px-6 py-3 rounded-lg text-white hover:bg-red-600 transition duration-300"
+    >
+      Logout
+    </a>
+  </body>
+</html>
+  

@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gamification Health App</title>
+    <!-- Menggunakan Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      body {
+        background: url("https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0")
+          no-repeat center center fixed;
+        background-size: cover;
+      }
+    </style>
+  </head>
+  <body
+    class="bg-gradient-to-br from-purple-900 to-black text-white font-sans leading-normal tracking-normal min-h-screen"
+  >
+    <!-- Header dengan Animasi -->
+    <header class="text-center py-8 animate-pulse">
+      <h1 class="text-5xl font-extrabold text-purple-400">
+        🎮 Selamat Datang di Gamification Project!
+      </h1>
+      <p class="text-lg mt-4 text-purple-300">
+        Aplikasi yang membuat kesehatan jadi lebih menyenangkan!
+      </p>
+    </header>
+
+    <!-- Navbar dengan Desain Menarik -->
+    <nav
+      class="flex justify-center space-x-6 bg-purple-800 text-white p-4 shadow-lg rounded-lg"
+    >
+      <a href="/admin/" class="font-semibold hover:text-purple-300 transition"
+        >Admin Panel</a
+      >
+      <a href="/tasks/" class="font-semibold hover:text-purple-300 transition"
+        >Tasks</a
+      >
+      <a href="/api/" class="font-semibold hover:text-purple-300 transition"
+        >API</a
+      >
+
+      <!-- Profil dengan Foto dan Link -->
+      {% if user.is_authenticated %}
+      <div class="flex items-center space-x-4">
+        <!-- Tampilkan Foto Profil -->
+        <a href="{% url 'profile' %}" class="flex items-center space-x-2">
+          {% if user.profile.profile_picture %}
+          <img
+            src="{{ user.profile.profile_picture.url }}"
+            alt="Foto Profil"
+            class="w-12 h-12 rounded-full border-2 border-white"
+          />
+          {% else %}
+          <!-- Jika tidak ada foto profil, tampilkan avatar default -->
+          <img
+            src="https://via.placeholder.com/150"
+            alt="Foto Default"
+            class="w-12 h-12 rounded-full border-2 border-white"
+          />
+          {% endif %}
+        </a>
+
+        <p>👤 <strong>{{ user.username }}</strong></p>
+        <p>⭐ Level: <strong>{{ user.profile.level }}</strong></p>
+        <p>🎯 EXP: <strong>{{ user.profile.exp }}</strong></p>
+
+        <a
+          href="{% url 'logout' %}"
+          class="bg-red-500 px-4 py-2 rounded-lg text-white hover:bg-red-600 transition"
+          >Logout</a
+        >
+      </div>
+      {% else %}
+      <a
+        href="{% url 'login' %}"
+        class="bg-green-500 px-4 py-2 rounded-lg text-white hover:bg-green-600 transition"
+        >Login</a
+      >
+      <a
+        href="{% url 'register' %}"
+        class="bg-yellow-500 px-4 py-2 rounded-lg text-white hover:bg-yellow-600 transition"
+        >Register</a
+      >
+      {% endif %}
+    </nav>
+
+    <!-- Main Section dengan Animasi dan Card -->
+    <section class="p-12 text-center">
+      <h2 class="text-4xl font-bold text-purple-300 mb-8">
+        💡 Tentang Proyek Ini
+      </h2>
+      <p class="text-lg mb-8 text-purple-200">
+        Aplikasi ini dirancang untuk membuat rutinitas sehat menjadi lebih seru
+        dengan sistem gamifikasi berbasis poin, level, dan tugas harian.
+      </p>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <!-- Card 1 -->
+        <div
+          class="bg-purple-800 text-white p-6 rounded-lg shadow-lg hover:shadow-xl transition duration-300"
+        >
+          <h3 class="text-2xl font-bold">🎯 Tugas Harian</h3>
+          <p class="mt-4 text-purple-200">
+            Selesaikan tugas-tugas harian dan raih poin untuk naik level.
+          </p>
+        </div>
+
+        <!-- Card 2 -->
+        <div
+          class="bg-purple-800 text-white p-6 rounded-lg shadow-lg hover:shadow-xl transition duration-300"
+        >
+          <h3 class="text-2xl font-bold">🏆 Level dan EXP</h3>
+          <p class="mt-4 text-purple-200">
+            Kumpulkan EXP dan capai level baru dengan setiap tugas yang kamu
+            selesaikan.
+          </p>
+        </div>
+
+        <!-- Card 3 -->
+        <div
+          class="bg-purple-800 text-white p-6 rounded-lg shadow-lg hover:shadow-xl transition duration-300"
+        >
+          <h3 class="text-2xl font-bold">📊 Statistik Kemajuan</h3>
+          <p class="mt-4 text-purple-200">
+            Lihat statistik kesehatan dan kebugaranmu dengan sistem visual yang
+            menarik.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-purple-900 text-center p-6 text-white mt-16">
+      <p>&copy; 2025 Gamification Project. All Rights Reserved.</p>
+    </footer>
+  </body>
+</html>

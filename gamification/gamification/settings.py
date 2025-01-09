@@ -39,7 +39,10 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'tasks',
     'rest_framework',
+    
 ]
+
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -56,7 +59,10 @@ ROOT_URLCONF = 'gamification.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [
+            BASE_DIR / "gamification" / "templates",  # Untuk template global
+            BASE_DIR / "tasks" / "templates"          # Untuk template dalam app tasks
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -67,7 +73,11 @@ TEMPLATES = [
             ],
         },
     },
+
+    
 ]
+
+
 
 WSGI_APPLICATION = 'gamification.wsgi.application'
 
@@ -78,9 +88,9 @@ WSGI_APPLICATION = 'gamification.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-       'NAME': 'postgres',
+       'NAME': 'test_db',
        'USER': 'postgres',
-       'PASSWORD': ' ',
+       'PASSWORD': 'dina2004',
        'HOST': 'localhost',
        'PORT': '5432',
     }
@@ -128,5 +138,13 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-LOGIN_REDIRECT_URL = 'task_list'
 LOGOUT_REDIRECT_URL = 'login'
+LOGIN_REDIRECT_URL = '/'  # Arahkan ke halaman index setelah login
+
+import os
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+
+

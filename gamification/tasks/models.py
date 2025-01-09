@@ -1,16 +1,18 @@
 from django.db import models
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User 
 from django_resized import ResizedImageField
 from tinymce.models import HTMLField
 
+
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    email = models.EmailField(max_length=254, blank=True, null=False)
-    bio = HTMLField(null=True, blank=True)
-    profile_pic = ResizedImageField(size=[50, 80], quality=100, upload_to="authors", default=None, null=True, blank=True)
-    exp = models.IntegerField(default=0)
-    coins = models.IntegerField(default=0)
     level = models.IntegerField(default=1)
+    exp = models.IntegerField(default=0)
+    bio = models.TextField(blank=True, null=True)  # Kolom bio ditambahkan
+    profile_picture = models.ImageField(upload_to='profile_pics/', blank=True, null=True)
+
+    def __str__(self):
+        return self.user.username
 
     def __str__(self):
         return self.user.username
@@ -31,30 +33,23 @@ class Task(models.Model):
     def __str__(self):
         return self.title
 
-class WeeklyTask(models.Model):
-    user = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
-    task = models.ForeignKey(Task, on_delete=models.CASCADE)
-    week_start_date = models.DateField()
-
-    def __str__(self):
-        return f"{self.user.user.username} - {self.task.title} - {self.week_start_date}"
-
 class DailyTask(models.Model):
-    weekly_task = models.ForeignKey(WeeklyTask, on_delete=models.CASCADE)
+    user = models.ForeignKey(UserProfile, on_delete=models.CASCADE)  
+    task = models.ForeignKey(Task, on_delete=models.CASCADE)
     day = models.DateField()
     is_completed = models.BooleanField(default=False)
+from django.db import models
 
-    def __str__(self):
-        return f"{self.weekly_task.user.user.username} - {self.weekly_task.task.title} - {self.day}"
 
 class CustomTask(models.Model):
-    user = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
     title = models.CharField(max_length=255)
+    user = models.ForeignKey('tasks.UserProfile', on_delete=models.CASCADE)
     description = models.TextField()
     exp_reward = models.IntegerField()
     coin_reward = models.IntegerField()
     is_validated = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
+    is_completed = models.BooleanField(default=False)
 
     def __str__(self):
         return self.title
@@ -106,4 +101,5 @@ class UserAchievement(models.Model):
 
     def __str__(self):
         return f"{self.user.user.username} - {self.achievement.name}"
-# Create your models here.
+
+

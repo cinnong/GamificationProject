@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Daftar Tugas - Gamification Health App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body
+    class="bg-gradient-to-br from-gray-900 to-black min-h-screen flex items-center justify-center font-sans text-gray-100"
+  >
+    <!-- Modal untuk Notifikasi -->
+    <div
+      id="notificationModal"
+      class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50"
+    >
+      <div class="bg-white p-8 rounded-lg shadow-lg text-center max-w-md">
+        <h2 class="text-2xl font-bold text-gray-800">🎉 Poin Diterima!</h2>
+        <p class="mt-4 text-gray-600">
+          Kamu telah berhasil menyelesaikan tugas dan mendapatkan poin!
+        </p>
+        <button
+          onclick="closeModal()"
+          class="mt-6 bg-purple-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-purple-700 transition duration-300"
+        >
+          Tutup
+        </button>
+      </div>
+    </div>
+
+    <!-- Container Utama -->
+    <div
+      class="bg-gray-800 max-w-3xl w-full p-10 rounded-xl shadow-2xl border border-gray-700 transform transition-all hover:scale-105 duration-500"
+    >
+      <!-- Judul Halaman -->
+      <h1 class="text-5xl font-extrabold text-center text-purple-400 mb-6">
+        🎮 Daftar Tugas Harian
+      </h1>
+      <p class="text-center text-gray-400 mb-8 text-lg">
+        Selesaikan tugas harianmu dan dapatkan
+        <span class="font-semibold text-purple-400">poin </span>!!
+      </p>
+
+      <!-- Form Filter dengan Persistensi Pilihan -->
+      <form method="get" class="mb-8 flex flex-col space-y-4">
+        <label for="difficulty" class="text-lg font-medium text-gray-300">
+          🎚️ Filter Berdasarkan Tingkat Kesulitan:
+        </label>
+        <select
+          name="difficulty"
+          id="difficulty"
+          class="p-3 border border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 bg-gray-700 text-gray-100"
+        >
+          <option value="">Semua Tugas</option>
+          <option value="easy">🌱 Mudah</option>
+          <option value="medium">🔥 Menengah</option>
+          <option value="hard">💪 Sulit</option>
+        </select>
+        <button
+          type="submit"
+          class="w-full bg-purple-600 text-white py-3 rounded-lg font-bold hover:bg-purple-700 transition duration-300 shadow-lg"
+        >
+          Terapkan Filter
+        </button>
+      </form>
+
+      <!-- Daftar Tugas -->
+      <ul class="space-y-6">
+        {% for task in tasks %}
+        <li
+          class="bg-gray-100 p-6 rounded-lg shadow-md flex justify-between items-center border-l-8 {% if task.difficulty == 'easy' %}border-green-400{% elif task.difficulty == 'medium' %}border-yellow-400{% else %}border-red-400{% endif %}"
+        >
+          <div>
+            <h3 class="text-2xl font-bold text-gray-800">{{ task.title }}</h3>
+            <p class="text-gray-600 mt-2">{{ task.description }}</p>
+            <p class="mt-2 text-sm font-semibold text-blue-600">
+              🎯 Kesulitan: {{ task.get_difficulty_display }}
+            </p>
+            <!-- Menampilkan Jumlah Koin yang Diperoleh -->
+            <p class="mt-2 text-sm font-semibold text-yellow-500">
+              💰 Koin yang Diperoleh: {{ task.coin_reward }}
+            </p>
+          </div>
+
+          {% if not task.is_completed %}
+          <button
+            onclick="showNotification({{ task.id }}, {{ task.coin_reward }})"
+            id="task-button-{{ task.id }}"
+            class="bg-green-500 text-white px-6 py-3 rounded-lg font-bold hover:bg-green-600 transition duration-300 transform hover:scale-105"
+          >
+            Selesaikan
+          </button>
+          {% else %}
+          <span class="text-lg font-bold text-green-700">✔️ Selesai</span>
+          {% endif %}
+        </li>
+        {% empty %}
+        <li class="text-center text-gray-600 text-lg font-semibold">
+          🚀 Tidak ada tugas yang tersedia! Ayo buat tantangan baru.
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <!-- JavaScript untuk Mengelola Pop-up dan Menyimpan Filter -->
+    <script>
+      // Mengatur Modal Notifikasi
+      // Menampilkan modal dengan jumlah koin
+      function showNotification(taskId, coinReward) {
+        document.getElementById("notificationModal").classList.remove("hidden");
+        document.querySelector(
+          "#notificationModal p"
+        ).innerText = `Kamu telah berhasil menyelesaikan tugas dan mendapatkan ${coinReward} koin!`;
+
+        document.getElementById(`task-button-${taskId}`).innerHTML =
+          "✔️ Selesai";
+        document
+          .getElementById(`task-button-${taskId}`)
+          .classList.add("bg-gray-400", "cursor-not-allowed");
+        document
+          .getElementById(`task-button-${taskId}`)
+          .removeAttribute("onclick");
+      }
+
+      // Menutup modal
+      function closeModal() {
+        document.getElementById("notificationModal").classList.add("hidden");
+      }
+
+      function closeModal() {
+        document.getElementById("notificationModal").classList.add("hidden");
+      }
+
+      // Persistensi Pilihan Dropdown
+      window.onload = function () {
+        const urlParams = new URLSearchParams(window.location.search);
+        const difficulty = urlParams.get("difficulty");
+        if (difficulty) {
+          document.getElementById("difficulty").value = difficulty;
+        }
+      };
+    </script>
+  </body>
+</html>
