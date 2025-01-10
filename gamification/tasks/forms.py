@@ -10,7 +10,7 @@ from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 class CustomTaskForm(forms.ModelForm):
     class Meta:
         model = CustomTask
-        fields = ['title', 'description', 'exp_reward', 'coin_reward']
+        fields = ['title', 'description']
 
 class UserRegisterForm(UserCreationForm):
     email = forms.EmailField()
@@ -34,5 +34,5 @@ from .models import UserProfile
 class UserProfileForm(forms.ModelForm):
     class Meta:
         model = UserProfile
-        fields = ['bio', 'profile_picture']  # Hanya form, bukan model baru
+        fields = ['bio', 'banner_image', 'profile_picture']  # Hanya form, bukan model baru
 

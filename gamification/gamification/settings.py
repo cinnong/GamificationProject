@@ -138,13 +138,15 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-LOGOUT_REDIRECT_URL = 'login'
-LOGIN_REDIRECT_URL = '/'  # Arahkan ke halaman index setelah login
+LOGIN_REDIRECT_URL = 'index'  # Mengarahkan ke index.html setelah login
+LOGOUT_REDIRECT_URL = 'home'  # Mengarahkan ke home setelah logout
+
+
 
 import os
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')    
 
 
 

@@ -24,3 +24,7 @@ class TaskAdmin(admin.ModelAdmin):
         form = super().get_form(request, obj, **kwargs)
         form.base_fields['difficulty'].choices = Task.DIFFICULTY_CHOICES
         return form
+
+@admin.register(UserProfile)
+class UserProfileAdmin(admin.ModelAdmin):
+    list_display = ('user', 'level', 'exp', 'coins')

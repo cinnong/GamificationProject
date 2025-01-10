@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Create Custom Task</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      body {
+        background: url("https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0")
+          no-repeat center center fixed;
+        background-size: cover;
+      }
+    </style>
+  </head>
+  <body
+    class="bg-gradient-to-br from-purple-900 to-black text-white font-sans leading-normal tracking-normal min-h-screen flex justify-center items-center"
+  >
+    <div
+      class="bg-white text-black p-10 rounded-xl shadow-2xl w-full max-w-lg transform transition-all hover:scale-105 duration-500 border border-gray-300"
+    >
+      <h1 class="text-4xl font-extrabold text-center mb-8 text-purple-600">
+        Create Custom Task
+      </h1>
+      <form method="post" class="space-y-6">
+        {% csrf_token %}
+        <div class="space-y-4">{{ form.as_p }}</div>
+        <button
+          type="submit"
+          class="w-full bg-gradient-to-r from-blue-500 to-purple-500 hover:from-purple-600 hover:to-blue-600 text-white font-bold py-3 px-4 rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105"
+        >
+          ➕ Create Task
+        </button>
+      </form>
+      <a
+        href="{% url 'task_list' %}"
+        class="block text-center mt-6 text-purple-400 hover:text-purple-300 transition duration-300"
+        >lihat Daftar Tugas</a
+      >
+    </div>
+  </body>
+</html>
