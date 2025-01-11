@@ -60,12 +60,13 @@
 
       <!-- Notifikasi -->
       {% if messages %}
-      <div class="bg-red-500 text-white p-4 mb-4 rounded-lg">
-        {% for message in messages %}
-        <p>{{ message }}</p>
-        {% endfor %}
-      </div>
-      {% endif %}
+    {% for message in messages %}
+        {% if message.tags == 'error' %}
+            <div class="bg-red-500 text-white p-4 mb-4 rounded-lg">{{ message }}</div>
+        {% endif %}
+    {% endfor %}
+{% endif %}
+
 
       <!-- Form Login -->
       <form method="post" action="{% url 'login' %}">
@@ -85,7 +86,6 @@
         </div>
         {% endfor %}
 
-        
         <!-- Tombol Login -->
         <button
           type="submit"

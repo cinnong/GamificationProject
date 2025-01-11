@@ -13,26 +13,33 @@
     <p class="mt-4">👤 Username: {{ user.username }}</p>
     <p>⭐ Level: {{ user.userprofile.level }}</p>
     <p>🎯 EXP: {{ user.userprofile.exp }}</p>
-    <p>📝 Coins: {{ user.userprofile.coins }}</p>
-    
+    <p>🪙 Coins: {{ user.userprofile.coins }}</p>
+
     <!-- Banner Section -->
     {% if user.userprofile.banner_image %}
     <div class="w-full h-64 mb-6">
-        <img src="{{ user.userprofile.banner_image.url }}" alt="Banner" class="w-full h-full object-cover rounded-lg shadow-lg">
+      <img
+        src="{{ user.userprofile.banner_image.url }}"
+        alt="Banner"
+        class="w-full h-full object-cover rounded-lg shadow-lg"
+      />
     </div>
     {% else %}
-    <div class="w-full h-64 mb-6 bg-gray-700 flex items-center justify-center rounded-lg">
-        <p class="text-gray-400">Belum ada Banner Image</p>
+    <div
+      class="w-full h-64 mb-6 bg-gray-700 flex items-center justify-center rounded-lg"
+    >
+      <p class="text-gray-400">Belum ada Banner Image</p>
     </div>
+    <!-- Tambahkan Banner Image -->
+    {% if profile.banner_image %}
+    <div
+      class="w-full h-48 bg-cover bg-center"
+      style="background-image: url('{{ profile.banner_image.url }}');"
+    ></div>
+    {% else %}
+    <div class="w-full h-48 bg-gray-700"></div>
     {% endif %}
 
-    {% if user.userprofile.profile_picture %}
-    <img
-      src="{{ user.userprofile.profile_picture.url }}"
-      alt="Foto Profil"
-      class="w-32 h-32 rounded-full mt-4 border-4 border-purple-500"
-    />
-    {% else %}
     <img
       src="/media/profile_pics/default.jpg"
       alt="Foto Default"
@@ -76,16 +83,22 @@
         />
 
         <label for="bio" class="block font-semibold mt-4">Bio:</label>
-        <textarea name="bio" class="w-full p-3 border rounded-lg mt-2">{{ user.userprofile.bio }}</textarea>
+        <textarea name="bio" class="w-full p-3 border rounded-lg mt-2">
+{{ user.userprofile.bio }}</textarea
+        >
 
-        <label for="profile_picture" class="block font-semibold mt-4">Foto Profil:</label>
+        <label for="profile_picture" class="block font-semibold mt-4"
+          >Foto Profil:</label
+        >
         <input
           type="file"
           name="profile_picture"
           class="w-full p-3 border rounded-lg mt-2"
         />
 
-        <label for="banner_image" class="block font-semibold mt-4">Banner Image:</label>
+        <label for="banner_image" class="block font-semibold mt-4"
+          >Banner Image:</label
+        >
         <input
           type="file"
           name="banner_image"

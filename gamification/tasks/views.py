@@ -10,6 +10,7 @@ from .forms import UserProfileForm
 from django.contrib.auth.decorators import login_required
 from datetime import date
 from django.contrib import messages
+from django.views.decorators.csrf import csrf_exempt
 
 
 class TaskViewSet(viewsets.ModelViewSet):
@@ -32,13 +33,13 @@ def register(request):
         form = UserRegisterForm(request.POST)
         if form.is_valid():
             user = form.save()
-            user_profile = UserProfile.objects.create(user=user)
-            task = Task.objects.first()
-            DailyTask.objects.create(user=user_profile, task=task, day=date.today())
+            # Jangan buat UserProfile manual jika signal sudah ada
+            messages.success(request, "Akun berhasil dibuat! Silakan login.")
             return redirect('login')
     else:
         form = UserRegisterForm()
     return render(request, 'register.html', {'form': form})
+
 
 def user_login(request):
     form = UserLoginForm()
@@ -50,36 +51,57 @@ def user_login(request):
             login(request, user)
             return redirect('index')  
         else:
-            messages.error(request, "Username atau password salah!")
+            messages.error(request, "Username atau password salah!")  
+    
     return render(request, 'login.html', {'form':form})
 
 @login_required
 def index(request):
-    return render(request, 'index.html')
+    try:
+        user_profile = request.user.userprofile
+    except UserProfile.DoesNotExist:
+        messages.error(request, "Profil tidak ditemukan, silakan registrasi ulang.")
+        return redirect('register')
+    return render(request, 'index.html', {'user_profile': user_profile})
+
 
 def user_logout(request):
     logout(request)
     return redirect('login')
 
+@csrf_exempt 
 def complete_task(request, task_id):
-    task = get_object_or_404(DailyTask, id=task_id)
-    if task.is_completed:
-        messages.warning(request, "Tugas ini sudah diselesaikan sebelumnya.")
-        return redirect('task_list')
-    task.is_completed = True
-    task.save()
     try:
-        user_profile = UserProfile.objects.get(user=task.user.user)
+        # Cek apakah task merupakan DailyTask atau CustomTask
+        task = DailyTask.objects.get(id=task_id)
+        
+        if task.is_completed:
+            messages.warning(request, "Tugas ini sudah selesai sebelumnya.")
+            return redirect('task_list')
+
+        # Tandai sebagai selesai
+        task.is_completed = True    
+        task.save()
+
+        # Update EXP dan Coins hanya jika DailyTask
+        user_profile = task.user
         user_profile.add_exp(task.task.exp_reward)
         user_profile.add_coins(task.task.coin_reward)
-    except UserProfile.DoesNotExist:
-        messages.error(request, "Profil pengguna tidak ditemukan.")
-        return redirect('task_list')
-    messages.success(
-        request,
-        f"Tugas '{task.task.title}' selesai! Kamu mendapatkan {task.task.exp_reward} EXP dan {task.task.coin_reward} koin!"
-    )
+        user_profile.save()
+
+        messages.success(request, f"Tugas '{task.task.title}' selesai! Kamu mendapatkan {task.task.exp_reward} EXP dan {task.task.coin_reward} koin!")
+    except DailyTask.DoesNotExist:
+        try:
+            # Jika bukan DailyTask, cek CustomTask
+            task = CustomTask.objects.get(id=task_id)
+            task.is_completed = True
+            task.save()
+            messages.success(request, f"Tugas custom '{task.title}' berhasil diselesaikan!")
+        except CustomTask.DoesNotExist:
+            messages.error(request, "Tugas tidak ditemukan.")
+     
     return redirect('task_list')
+
 
 def task_list(request):
     difficulty_filter = request.GET.get('difficulty', None)
@@ -87,9 +109,17 @@ def task_list(request):
     custom_tasks = CustomTask.objects.filter(user=request.user.userprofile).order_by('-id')
     if difficulty_filter:
         tasks = tasks.filter(difficulty=difficulty_filter)
+
+    #      # Perbaikan: Gabungkan tasks dan custom_tasks untuk ditampilkan bersama
+    # all_tasks = list(tasks) + list(custom_tasks)
+    # return render(request, 'task_list.html', {'tasks': tasks, 'custom_tasks': custom_tasks})
+
+# Mengirimkan hanya tugas yang sudah dihubungkan dengan DailyTask
+    custom_tasks = CustomTask.objects.filter(user=request.user.userprofile).order_by('-id')
     return render(request, 'task_list.html', {'tasks': tasks, 'custom_tasks': custom_tasks})
 
-def create_custom_task(request):
+
+def create_custom_task(request):        
     if request.method == 'POST':
         form = CustomTaskForm(request.POST)
         if form.is_valid():

@@ -10,9 +10,8 @@ class UserProfile(models.Model):
     coins = models.IntegerField(default=0)
     bio = models.TextField(blank=True, null=True)
     profile_picture = models.ImageField(upload_to='profile_pics/', blank=True, null=True)
-    banner_image = models.ImageField(upload_to='banners/', blank=True, null=True)
-
-    # EXP and Leveling System
+    banner_image = models.ImageField(upload_to='banner_images/', blank=True, null=True)  # Tambahkan ini   
+    
     def add_exp(self, amount):
         self.exp += amount
         self.check_level_up()
@@ -24,7 +23,6 @@ class UserProfile(models.Model):
             self.exp -= required_exp
             self.level += 1
             required_exp = self.level * 100
-
     def add_coins(self, amount):
         self.coins += amount
         self.save()
@@ -38,12 +36,19 @@ class UserProfile(models.Model):
 
     def __str__(self):
         return self.user.username
-
-# ✅ SIGNALS: Membuat UserProfile Otomatis saat User baru dibuat
+    
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
     if created:
         UserProfile.objects.create(user=instance)
+        instance.userprofile.save()
+    
+
+# ✅ SIGNALS: Membuat UserProfile Otomatis saat User baru dibuat
+# @receiver(post_save, sender=User)
+# def create_user_profile(sender, instance, created, **kwargs):
+#     if created:
+#         UserProfile.objects.create(user=instance)
 
 @receiver(post_save, sender=User)
 def save_user_profile(sender, instance, **kwargs):

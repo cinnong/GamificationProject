@@ -26,11 +26,16 @@
       </p>
     </header>
 
-    <!-- Navbar di Pojok Kanan Atas dengan Dropdown Aktif -->
+    <!-- ✅ Navbar di Pojok Kanan Atas dengan Dropdown Aktif -->
     <div class="absolute top-0 right-0 m-4">
       {% if user.is_authenticated %}
-      <div class="relative group">
-        <button class="flex items-center space-x-2 focus:outline-none">
+      <!-- ✅ Tambahkan elemen yang mengontrol dropdown -->
+      <div class="relative inline-block text-left">
+        <button
+          class="flex items-center space-x-2 focus:outline-none"
+          onclick="toggleDropdown()"
+        >
+          <!-- ✅ Menampilkan Foto Profil -->
           {% if user.userprofile.profile_picture %}
           <img
             src="{{ user.userprofile.profile_picture.url }}"
@@ -46,13 +51,16 @@
           {% endif %}
           <span>{{ user.username }}</span>
         </button>
+
+        <!-- ✅ Dropdown Menu -->
         <div
-          class="absolute right-0 mt-2 w-48 bg-purple-800 text-white rounded-lg shadow-lg py-2 hidden group-hover:block"
+          id="profileDropdown"
+          class="absolute right-0 mt-2 w-48 bg-purple-800 text-white rounded-lg shadow-lg py-2 hidden"
         >
           <a
             href="{% url 'profile' %}"
             class="block px-4 py-2 hover:bg-purple-700"
-            >Profile</a
+            >Profil</a
           >
           <a
             href="{% url 'logout' %}"
@@ -60,24 +68,32 @@
             >Logout</a
           >
         </div>
+
+        <!-- ✅ Informasi Level, EXP, dan Coins -->
+        <p class="text-sm text-white mt-4">
+          ⭐ Level: <strong>{{ user.userprofile.level }}</strong> | 🎯 EXP:
+          <strong>{{ user.userprofile.exp }}</strong> | 💰 Coins:
+          <strong>{{ user.userprofile.coins }}</strong>
+        </p>
       </div>
-      <p class="text-sm text-white">
-        ⭐ Level: <strong>{{ user.profile.level }}</strong> | 🎯 EXP:
-        <strong>{{ user.profile.exp }}</strong>
-      </p>
-      {% else %}
-      <a
-        href="{% url 'login' %}"
-        class="bg-green-500 px-4 py-2 rounded-lg text-white hover:bg-green-600 transition"
-        >Login</a
-      >
-      <a
-        href="{% url 'register' %}"
-        class="bg-yellow-500 px-4 py-2 rounded-lg text-white hover:bg-yellow-600 transition"
-        >Register</a
-      >
       {% endif %}
     </div>
+
+    <!-- ✅ JavaScript untuk Mengontrol Dropdown -->
+    <script>
+      function toggleDropdown() {
+        const dropdown = document.getElementById("profileDropdown");
+        dropdown.classList.toggle("hidden");
+      }
+
+      // Menutup dropdown saat klik di luar area dropdown
+      window.onclick = function (event) {
+        if (!event.target.closest("button")) {
+          const dropdowns = document.getElementById("profileDropdown");
+          dropdowns.classList.add("hidden");
+        }
+      };
+    </script>
 
     <!-- Main Section dengan Animasi dan Card -->
     <section class="p-12 text-center">
@@ -104,10 +120,9 @@
           <div
             class="bg-purple-800 text-white p-6 rounded-lg shadow-lg transform transition duration-300 hover:scale-105 hover:shadow-2xl hover:ring-4 hover:ring-purple-500"
           >
-            <h3 class="text-2xl font-bold">🏆 Level dan EXP</h3>
+            <h3 class="text-2xl font-bold">Tugas Custom</h3>
             <p class="mt-4 text-purple-200">
-              Kumpulkan EXP dan capai level baru dengan setiap tugas yang kamu
-              selesaikan.
+              Buat tugas kamu yang sesuai dengan kebutuhanmu disini!
             </p>
           </div>
         </a>
@@ -116,11 +131,8 @@
         <div
           class="bg-purple-800 text-white p-6 rounded-lg shadow-lg hover:shadow-xl transition duration-300"
         >
-          <h3 class="text-2xl font-bold">📊 Statistik Kemajuan</h3>
-          <p class="mt-4 text-purple-200">
-            Lihat statistik kesehatan dan kebugaranmu dengan sistem visual yang
-            menarik.
-          </p>
+          <h3 class="text-2xl font-bold">Lorem</h3>
+          <p class="mt-4 text-purple-200">Lorem Ipsum.</p>
         </div>
       </div>
     </section>
