@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django_resized import ResizedImageField
 from django.dispatch import receiver
 from django.db.models.signals import post_save
 
@@ -9,8 +10,8 @@ class UserProfile(models.Model):
     exp = models.IntegerField(default=0)
     coins = models.IntegerField(default=0)
     bio = models.TextField(blank=True, null=True)
-    profile_picture = models.ImageField(upload_to='profile_pics/', blank=True, null=True)
-    banner_image = models.ImageField(upload_to='banner_images/', blank=True, null=True)  # Tambahkan ini   
+    profile_picture = ResizedImageField(size=[50, 80], quality=100, upload_to="profile_pics", default=None, null=True, blank=True)
+    banner_image = models.ImageField(upload_to='banner_images/', blank=True, null=True) 
     
     def add_exp(self, amount):
         self.exp += amount
