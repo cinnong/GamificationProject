@@ -6,6 +6,7 @@ from django.contrib import admin
 
 urlpatterns = [
     path('', views.index, name='index'),
+    # urls.py
     path('complete/<int:task_id>/', views.complete_task, name='complete_task'),
     path('task_list/', views.task_list, name='task_list'),
     path('tasks/delete/<int:task_id>/', views.delete_custom_task, name='delete_custom_task'),

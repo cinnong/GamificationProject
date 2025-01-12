@@ -28,8 +28,7 @@ class DailyTaskForm(forms.ModelForm):
         model = DailyTask
         fields = ['task', 'day']
 
-from django import forms
-from .models import UserProfile
+
 
 class UserProfileForm(forms.ModelForm):
     class Meta:
