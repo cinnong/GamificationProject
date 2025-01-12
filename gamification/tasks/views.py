@@ -11,6 +11,8 @@ from django.contrib.auth.decorators import login_required
 from datetime import date
 from django.contrib import messages
 from django.views.decorators.csrf import csrf_exempt
+from django.utils.timezone import now
+from django.db.models import Sum
 
 
 class TaskViewSet(viewsets.ModelViewSet):
@@ -57,12 +59,19 @@ def user_login(request):
 
 @login_required
 def index(request):
+    
     try:
         user_profile = request.user.userprofile
     except UserProfile.DoesNotExist:
         messages.error(request, "Profil tidak ditemukan, silakan registrasi ulang.")
         return redirect('register')
     return render(request, 'index.html', {'user_profile': user_profile})
+
+    # Menambahkan top_players untuk leaderboard
+    top_players = UserProfile.objects.select_related('user').order_by('-exp')[:5]
+
+    return render(request, 'index.html', {'user_profile': user_profile, 'top_players': top_players})
+
 
 
 def user_logout(request):
@@ -88,7 +97,6 @@ def complete_task(request, task_id):
         user_profile.add_exp(task.task.exp_reward)
         user_profile.add_coins(task.task.coin_reward)
         user_profile.save()
-
         messages.success(request, f"Tugas '{task.task.title}' selesai! Kamu mendapatkan {task.task.exp_reward} EXP dan {task.task.coin_reward} koin!")
     except DailyTask.DoesNotExist:
         try:
@@ -137,8 +145,14 @@ def delete_custom_task(request, task_id):
     return redirect('task_list')
 
 def leaderboard(request):
-    top_users = UserProfile.objects.order_by('-exp')[:10]
+    today = now().date()
+    # Filter user dengan exp yang bertambah dalam 7 hari terakhir
+    top_users = UserProfile.objects.annotate(
+        total_exp=Sum('exp')
+    ).order_by('-exp')[:5]
+
     return render(request, 'tasks/leaderboard.html', {'top_users': top_users})
+
 
 @login_required
 def profile_view(request):
@@ -151,3 +165,6 @@ def profile_view(request):
     else:
         form = UserProfileForm(instance=profile)
     return render(request, 'profile.html', {'profile': profile, 'form': form})
+
+
+    
