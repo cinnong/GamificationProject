@@ -1,19 +1,58 @@
 from django.db import models
 from django.contrib.auth.models import User
-from django_resized import ResizedImageField
-from tinymce.models import HTMLField
+from django.dispatch import receiver
+from django.db.models.signals import post_save
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    email = models.EmailField(max_length=254, blank=True, null=False)
-    bio = HTMLField(null=True, blank=True)
-    profile_pic = ResizedImageField(size=[50, 80], quality=100, upload_to="authors", default=None, null=True, blank=True)
+    level = models.IntegerField(default=1)
     exp = models.IntegerField(default=0)
     coins = models.IntegerField(default=0)
-    level = models.IntegerField(default=1)
+    bio = models.TextField(blank=True, null=True)
+    profile_picture = models.ImageField(upload_to='profile_pics/', blank=True, null=True)
+    banner_image = models.ImageField(upload_to='banner_images/', blank=True, null=True)  # Tambahkan ini   
+    
+    def add_exp(self, amount):
+        self.exp += amount
+        self.check_level_up()
+        self.save()
+
+    def check_level_up(self):
+        required_exp = self.level * 100
+        while self.exp >= required_exp:
+            self.exp -= required_exp
+            self.level += 1
+            required_exp = self.level * 100
+    def add_coins(self, amount):
+        self.coins += amount
+        self.save()
+
+    def subtract_coins(self, amount):
+        if self.coins >= amount:
+            self.coins -= amount
+            self.save()
+            return True
+        return False
 
     def __str__(self):
         return self.user.username
+    
+@receiver(post_save, sender=User)
+def create_user_profile(sender, instance, created, **kwargs):
+    if created:
+        UserProfile.objects.create(user=instance)
+        instance.userprofile.save()
+    
+
+# ✅ SIGNALS: Membuat UserProfile Otomatis saat User baru dibuat
+# @receiver(post_save, sender=User)
+# def create_user_profile(sender, instance, created, **kwargs):
+#     if created:
+#         UserProfile.objects.create(user=instance)
+
+@receiver(post_save, sender=User)
+def save_user_profile(sender, instance, **kwargs):
+    instance.userprofile.save()
 
 class Task(models.Model):
     DIFFICULTY_CHOICES = [
@@ -24,37 +63,28 @@ class Task(models.Model):
 
     title = models.CharField(max_length=255)
     description = models.TextField()
-    difficulty = models.CharField(max_length=6, choices=DIFFICULTY_CHOICES)
+    difficulty = models.CharField(max_length=10, choices=DIFFICULTY_CHOICES)
     exp_reward = models.IntegerField()
     coin_reward = models.IntegerField()
+    is_completed = models.BooleanField(default=False)
+    is_custom = models.BooleanField(default=False)
 
     def __str__(self):
         return self.title
 
-class WeeklyTask(models.Model):
+class DailyTask(models.Model):
     user = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
-    week_start_date = models.DateField()
-
-    def __str__(self):
-        return f"{self.user.user.username} - {self.task.title} - {self.week_start_date}"
-
-class DailyTask(models.Model):
-    weekly_task = models.ForeignKey(WeeklyTask, on_delete=models.CASCADE)
     day = models.DateField()
     is_completed = models.BooleanField(default=False)
 
-    def __str__(self):
-        return f"{self.weekly_task.user.user.username} - {self.weekly_task.task.title} - {self.day}"
-
 class CustomTask(models.Model):
-    user = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
     title = models.CharField(max_length=255)
+    user = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
     description = models.TextField()
-    exp_reward = models.IntegerField()
-    coin_reward = models.IntegerField()
     is_validated = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
+    is_completed = models.BooleanField(default=False)
 
     def __str__(self):
         return self.title
@@ -90,7 +120,7 @@ class Notification(models.Model):
 
     def __str__(self):
         return f"{self.user.user.username} - {self.message}"
-    
+
 class Achievement(models.Model):
     name = models.CharField(max_length=255)
     description = models.TextField()
@@ -106,4 +136,3 @@ class UserAchievement(models.Model):
 
     def __str__(self):
         return f"{self.user.user.username} - {self.achievement.name}"
-# Create your models here.

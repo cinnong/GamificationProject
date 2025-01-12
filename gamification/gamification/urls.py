@@ -17,14 +17,27 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from tasks.views import TaskViewSet, UserProfileViewSet
+from tasks.views import TaskViewSet, UserProfileViewSet, index
+from tasks import views  # Import views secara langsung
+from tasks.views import profile_view
+from django.conf import settings
+from django.conf.urls.static import static
 
 router = DefaultRouter()
 router.register(r'tasks', TaskViewSet)
 router.register(r'users', UserProfileViewSet)
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('tasks/', include('tasks.urls')),  # Include app-level URLs
-    path('api/', include(router.urls)),  # Include API routes
+    path('admin/', admin.site.urls),path('admin/', admin.site.urls),
+    path('', views.home, name='home'), 
+    path('login/', views.user_login, name='login'),
+    path('register/', views.register, name='register'),
+    path('index/', views.index, name='index'),   # Redirect setelah login
+    path('tasks/', include('tasks.urls')),  
+    path('profile/', profile_view, name='profile'),
+    path('logout/', views.user_logout, name='logout'),
+    
+    path('api/', include('rest_framework.urls')),  
 ]
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
