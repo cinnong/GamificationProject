@@ -3,14 +3,14 @@ from .models import UserProfile, Task, DailyTask, CustomTask, Item, UserItem, Mo
 
 # admin.site.register(UserProfile)
 # admin.site.register(Task)
-# admin.site.register(DailyTask)
-# admin.site.register(CustomTask)
-# admin.site.register(Item)
-# admin.site.register(UserItem)
-# admin.site.register(Moderator)
-# admin.site.register(Notification)
-# admin.site.register(Achievement)
-# admin.site.register(UserAchievement)
+admin.site.register(DailyTask)
+admin.site.register(CustomTask)
+admin.site.register(Item)
+admin.site.register(UserItem)
+admin.site.register(Moderator)
+admin.site.register(Notification)
+admin.site.register(Achievement)
+admin.site.register(UserAchievement)
 
 @admin.register(Task)
 class TaskAdmin(admin.ModelAdmin):

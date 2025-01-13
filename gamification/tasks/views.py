@@ -83,6 +83,7 @@ def complete_task(request, task_id):
     try:
         # Cek apakah task merupakan DailyTask atau CustomTask
         task = DailyTask.objects.get(id=task_id)
+        print("something")
         
         if task.is_completed:
             messages.warning(request, "Tugas ini sudah selesai sebelumnya.")
@@ -97,6 +98,7 @@ def complete_task(request, task_id):
         user_profile.add_exp(task.task.exp_reward)
         user_profile.add_coins(task.task.coin_reward)
         user_profile.save()
+        print(user_profile)
         messages.success(request, f"Tugas '{task.task.title}' selesai! Kamu mendapatkan {task.task.exp_reward} EXP dan {task.task.coin_reward} koin!")
     except DailyTask.DoesNotExist:
         try:
@@ -107,24 +109,37 @@ def complete_task(request, task_id):
             messages.success(request, f"Tugas custom '{task.title}' berhasil diselesaikan!")
         except CustomTask.DoesNotExist:
             messages.error(request, "Tugas tidak ditemukan.")
-     
+        
     return redirect('task_list')
 
 
+from .models import Task, DailyTask, CustomTask, UserProfile
+
 def task_list(request):
+    from .models import Task
     difficulty_filter = request.GET.get('difficulty', None)
-    tasks = Task.objects.all().order_by('-id')
-    custom_tasks = CustomTask.objects.filter(user=request.user.userprofile).order_by('-id')
+
+    # Fetch all DailyTasks and CustomTasks without user filtering
+    daily_tasks = DailyTask.objects.all().distinct()
+    custom_tasks = CustomTask.objects.filter(user=request.user.userprofile).distinct()
+
     if difficulty_filter:
-        tasks = tasks.filter(difficulty=difficulty_filter)
+        daily_tasks = daily_tasks.filter(task__difficulty=difficulty_filter)
 
-    #      # Perbaikan: Gabungkan tasks dan custom_tasks untuk ditampilkan bersama
-    # all_tasks = list(tasks) + list(custom_tasks)
-    # return render(request, 'task_list.html', {'tasks': tasks, 'custom_tasks': custom_tasks})
+    # Send the choices from Task model
+    difficulty_choices = Task.DIFFICULTY_CHOICES
+    
+    return render(request, 'task_list.html', {
+        'tasks': daily_tasks,
+        'custom_tasks': custom_tasks,
+        'difficulty_choices': difficulty_choices
+    })
 
-# Mengirimkan hanya tugas yang sudah dihubungkan dengan DailyTask
-    custom_tasks = CustomTask.objects.filter(user=request.user.userprofile).order_by('-id')
-    return render(request, 'task_list.html', {'tasks': tasks, 'custom_tasks': custom_tasks})
+
+
+
+
+
 
 
 def create_custom_task(request):        

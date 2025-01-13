@@ -32,7 +32,7 @@
     href="{% url 'index' %}"
     class="mb-6 inline-block bg-blue-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-600 transition duration-300"
   >
-    ⬅ 
+    ⬅
   </a>
 
         <!-- Judul Halaman -->
@@ -43,140 +43,93 @@
             Selesaikan tugas harianmu dan dapatkan <span class="font-semibold text-purple-400">poin</span>!
         </p>
 
-        <!-- Form Filter -->
-        <form method="get" class="mb-8 flex flex-col space-y-4">
-            <label for="difficulty" class="text-lg font-medium text-gray-300">🎚️ Filter Berdasarkan Tingkat Kesulitan:</label>
-            <select
-                name="difficulty"
-                id="difficulty"
-                class="p-3 border border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 bg-gray-700 text-gray-100"
-            >
-                <option value="">Semua Tugas</option>
-                <option value="easy" {% if request.GET.difficulty == "easy" %}selected{% endif %}>🌱 Mudah</option>
-                <option value="medium" {% if request.GET.difficulty == "medium" %}selected{% endif %}>🔥 Menengah</option>
-                <option value="hard" {% if request.GET.difficulty == "hard" %}selected{% endif %}>💪 Sulit</option>
-            </select>
-            <button type="submit" class="w-full bg-purple-600 text-white py-3 rounded-lg font-bold hover:bg-purple-700 transition duration-300 shadow-lg">
-                Terapkan Filter
-            </button>
-        </form>
-        
+        <!-- Form Filter dengan Dynamic Choices -->
+        <!-- Form Filter dengan Dynamic Choices -->
+<form method="get" class="mb-8 flex flex-col space-y-4">
+    <label for="difficulty" class="text-lg font-medium text-gray-300">🎚️ Filter Berdasarkan Tingkat Kesulitan:</label>
+    <select
+        name="difficulty"
+        id="difficulty"
+        class="p-3 border border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 bg-gray-700 text-gray-100"
+    >
+        <option value="">Semua Tugas</option>
+        {% for value, label in difficulty_choices %}
+            <option value="{{ value }}" {% if request.GET.difficulty == value %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+    </select>
+    <button type="submit" class="w-full bg-purple-600 text-white py-3 rounded-lg font-bold hover:bg-purple-700 transition duration-300 shadow-lg">
+        Terapkan Filter
+    </button>
+</form>
 
-<!-- Daftar Tugas dengan Perbaikan -->
+
+<!-- Loop through Daily Tasks properly -->
 <ul class="space-y-6">
-  <h2 class="text-3xl font-bold text-blue-400 mb-4">📋 Tugas Harian</h2>
-  {% for task in tasks %}
-  <li class="bg-gray-100 p-6 rounded-lg shadow-md flex justify-between items-center border-l-8 
-      {% if task.difficulty == 'easy' %}border-green-400{% elif task.difficulty == 'medium' %}border-yellow-400{% else %}border-red-400{% endif %}">
-      <div>
-          <h3 class="text-2xl font-bold text-gray-800">{{ task.title }}</h3>
-          <p class="text-gray-600 mt-2">{{ task.description }}</p>
-          <p class="mt-2 text-sm font-semibold text-blue-600">🎯 Kesulitan: {{ task.get_difficulty_display }}</p>
-          <p class="mt-2 text-sm font-semibold text-yellow-500">💰 Koin yang Diperoleh: {{ task.coin_reward }}</p>
-      </div>
-      <div class="flex gap-4 items-center">
-          {% if not task.is_completed %}
-          <!-- ✅ Perubahan: Menambahkan event onsubmit -->
-          <form method="post" action="{% url 'complete_task' task.id %}" onsubmit="return confirmTaskCompletion(event, {{ task.id }}, {{ task.coin_reward }})">
-              {% csrf_token %}
-              <button
-                  type="submit"
-                  id="task-button-{{ task.id }}"
-                  class="bg-green-500 text-white px-6 py-3 rounded-lg font-bold hover:bg-green-600 transition duration-300 transform hover:scale-105"
-              >
-                  Selesaikan
-              </button>
-          </form>
-          {% else %}
-          <span class="text-lg font-bold text-green-700">✔️ Selesai</span>
-          {% endif %}
-      </div>
-  </li>
-  {% empty %}
-  <li class="text-center text-gray-600 text-lg font-semibold">
-      🚀 Tidak ada tugas yang tersedia! Ayo buat tantangan baru.
-  </li>
-  {% endfor %}
+    <h2 class="text-3xl font-bold text-blue-400 mb-4">📋 Tugas Harian</h2>
+    {% for daily_task in tasks %}
+    <li class="bg-gray-100 p-6 rounded-lg shadow-md flex justify-between items-center border-l-8 
+        {% if daily_task.task.difficulty == 'easy' %}border-green-400{% elif daily_task.task.difficulty == 'medium' %}border-yellow-400{% else %}border-red-400{% endif %}">
+        <div>
+            <h3 class="text-2xl font-bold text-gray-800">{{ daily_task.task.title }}</h3>
+            <p class="text-gray-600 mt-2">{{ daily_task.task.description }}</p>
+            <p class="mt-2 text-sm font-semibold text-blue-600">🎯 Kesulitan: {{ daily_task.task.get_difficulty_display }}</p>
+            <p class="mt-2 text-sm font-semibold text-yellow-500">💰 Koin yang Diperoleh: {{ daily_task.task.coin_reward }}</p>
+        </div>
+        <div class="flex gap-4 items-center">
+            {% if not daily_task.is_completed %}
+            <form method="post" action="{% url 'complete_task' daily_task.id %}">
+                {% csrf_token %}
+                <button
+                    type="submit"
+                    id="task-button-{{ daily_task.id }}"
+                    class="bg-green-500 text-white px-6 py-3 rounded-lg font-bold hover:bg-green-600 transition duration-300 transform hover:scale-105"
+                >
+                    Selesaikan
+                </button>
+            </form>
+            {% else %}
+            <span class="text-lg font-bold text-green-700">✔ Selesai</span>
+            {% endif %}
+        </div>
+    </li>
+    {% empty %}
+    <li class="text-center text-gray-600 text-lg font-semibold">
+        🚀 Tidak ada tugas yang tersedia! Ayo buat tantangan baru.
+    </li>
+    {% endfor %}
 </ul>
 
-
-        <!-- ✅ DAFTAR CUSTOM TASK (Ditempatkan setelah daftar tugas utama) -->
-        <ul class="space-y-6 mt-12">
-            <h2 class="text-3xl font-bold text-blue-400 mb-4">✏️ Tugas Custom</h2>
-            {% for task in custom_tasks %}
-            <li class="bg-gray-100 p-6 rounded-lg shadow-md flex justify-between items-center border-l-8 border-purple-400">
-                <div>
-                    <h3 class="text-2xl font-bold text-gray-800">{{ task.title }}</h3>
-                    <p class="text-gray-600 mt-2">{{ task.description }}</p>
-                    
-                    <!-- <p class="mt-2 text-sm font-semibold text-blue-600">💡 Dibuat oleh: {{ task.user.user.username }}</p> -->
-                </div>
-                <div class="flex gap-4 items-center">
-                  {% if not task.is_completed %}
-                  <!-- Form Submit untuk menghubungkan dengan views -->
-                  <form method="post" action="{% url 'complete_task' task.id %}">
-                    {% csrf_token %}
-                    <button
-                      type="submit"
-                      class="bg-green-500 text-white px-6 py-3 rounded-lg font-bold hover:bg-green-600 transition duration-300 transform hover:scale-105"
-                    >
-                      Selesaikan
-                    </button>
-                  </form>
-                  {% else %}
-                  <span class="text-lg font-bold text-green-700">✔️ Selesai</span>
-                  
-                  {% endif %} 
-                </div>
-            </li>
-            {% empty %}
-            <li class="text-center text-gray-600 text-lg font-semibold">
-                🚀 Kamu belum memiliki tugas custom! Ayo buat tugas baru.
-            </li>
-            {% endfor %}
-        </ul>
-
-        
+  <!-- ✅ DAFTAR CUSTOM TASK (Ditempatkan setelah daftar tugas utama) -->
+  <ul class="space-y-6 mt-12">
+      <h2 class="text-3xl font-bold text-blue-400 mb-4">✏ Tugas Custom</h2>
+      {% for custom_task in custom_tasks %}
+      <li class="bg-gray-100 p-6 rounded-lg shadow-md flex justify-between items-center border-l-8 border-purple-400">
+          <div>
+              <h3 class="text-2xl font-bold text-gray-800">{{ custom_task.title }}</h3>
+              <p class="text-gray-600 mt-2">{{ custom_task.description }}</p>
+          </div>
+          <div class="flex gap-4 items-center">
+            {% if not custom_task.is_completed %}
+            <form method="post" action="{% url 'complete_task' custom_task.id %}">
+              {% csrf_token %}
+              <button
+                type="submit"
+                class="bg-green-500 text-white px-6 py-3 rounded-lg font-bold hover:bg-green-600 transition duration-300 transform hover:scale-105"
+              >
+                Selesaikan
+              </button>
+            </form>
+            {% else %}
+            <span class="text-lg font-bold text-green-700">✔ Selesai</span>
+            {% endif %} 
+          </div>
+      </li>
+      {% empty %}
+      <li class="text-center text-gray-600 text-lg font-semibold">
+          🚀 Kamu belum memiliki tugas custom! Ayo buat tugas baru.
+      </li>
+      {% endfor %}
+  </ul>
     </div>
-
-    <!-- JavaScript untuk Mengelola Pop-up, Form Submission, dan Visual Button -->
-<!-- JavaScript yang diperbarui agar data dikirim ke server dengan AJAX -->
-<script>
-  function confirmTaskCompletion(event, taskId, coinReward) {
-      event.preventDefault(); // Mencegah form default submission
-
-      // Konfirmasi dengan server menggunakan AJAX
-      fetch(`/tasks/complete/${taskId}/`, {
-          method: 'POST',
-          headers: {
-              'X-CSRFToken': '{{ csrf_token }}', // Menggunakan token CSRF Django
-              'Content-Type': 'application/json',
-          },
-      })
-      .then(response => {
-          if (response.ok) {
-              // Menampilkan notifikasi hanya jika berhasil
-              document.getElementById("notificationModal").classList.remove("hidden");
-              document.querySelector("#notificationModal p").innerText = `Kamu telah berhasil menyelesaikan tugas dan mendapatkan ${coinReward} koin!`;
-              
-              // Update tampilan tombol selesai
-              const taskButton = document.getElementById(`task-button-${taskId}`);
-              taskButton.innerHTML = "✔️ Selesai";
-              taskButton.disabled = true;
-              taskButton.classList.remove("bg-green-500", "hover:bg-green-600");
-              taskButton.classList.add("bg-gray-400", "cursor-not-allowed");
-          } else {
-              alert('Terjadi kesalahan, coba lagi.');
-          }
-      })
-      .catch(error => console.error('Error:', error));
-  }
-
-  function closeModal() {
-      document.getElementById("notificationModal").classList.add("hidden");
-  }
-</script>
-
-
 </body>
 </html>

@@ -66,6 +66,8 @@ class Task(models.Model):
     difficulty = models.CharField(max_length=10, choices=DIFFICULTY_CHOICES)
     exp_reward = models.IntegerField()
     coin_reward = models.IntegerField()
+
+
     is_completed = models.BooleanField(default=False)
     is_custom = models.BooleanField(default=False)
 
