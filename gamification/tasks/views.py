@@ -13,6 +13,7 @@ from django.contrib import messages
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.timezone import now
 from django.db.models import Sum
+import logging
 
 
 class TaskViewSet(viewsets.ModelViewSet):
@@ -61,11 +62,11 @@ def user_login(request):
 def index(request):
     
     try:
-        user_profile = request.user.userprofile
+        userprofile = request.user
     except UserProfile.DoesNotExist:
         messages.error(request, "Profil tidak ditemukan, silakan registrasi ulang.")
         return redirect('register')
-    return render(request, 'index.html', {'user_profile': user_profile})
+    return render(request, 'index.html', {'user': userprofile})
 
     # Menambahkan top_players untuk leaderboard
     top_players = UserProfile.objects.select_related('user').order_by('-exp')[:5]
@@ -98,7 +99,6 @@ def complete_task(request, task_id):
         user_profile.add_exp(task.task.exp_reward)
         user_profile.add_coins(task.task.coin_reward)
         user_profile.save()
-        print(user_profile)
         messages.success(request, f"Tugas '{task.task.title}' selesai! Kamu mendapatkan {task.task.exp_reward} EXP dan {task.task.coin_reward} koin!")
     except DailyTask.DoesNotExist:
         try:
@@ -107,7 +107,9 @@ def complete_task(request, task_id):
             task.is_completed = True
             task.save()
             messages.success(request, f"Tugas custom '{task.title}' berhasil diselesaikan!")
+            print("=====================hahahahhahahhahahahaha")
         except CustomTask.DoesNotExist:
+            print("=====================hihiihihihihihihihihihihi")
             messages.error(request, "Tugas tidak ditemukan.")
         
     return redirect('task_list')

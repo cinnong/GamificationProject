@@ -88,9 +88,9 @@ WSGI_APPLICATION = 'gamification.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-       'NAME': 'test_db',
+       'NAME': 'gamification',
        'USER': 'postgres',
-       'PASSWORD': 'dina2004',
+       'PASSWORD': ' ',
        'HOST': 'localhost',
        'PORT': '5432',
     }
