@@ -1,157 +1,147 @@
-<!DOCTYPE html>
-<html lang="id">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>PlayDo</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-      body {
-        background: url("https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0")
-          no-repeat center center fixed;
-        background-size: cover;
-        display: flex;
-        flex-direction: column;
-        min-height: 100vh;
-        margin: 0;
-      }
-      main {
-        flex: 1; /* Membuat bagian main mengisi ruang kosong sehingga footer berada di bawah */
-      }
-    </style>
-  </head>
-  <body
-    class="bg-gradient-to-br from-purple-900 to-black text-white font-sans leading-normal tracking-normal"
-  >
-    <!-- Header dengan Animasi -->
-    <header class="text-center py-8 animate-pulse">
-      <h1 class="text-5xl font-extrabold text-purple-400">
-        🎮 Selamat Datang di PlayDo!
-      </h1>
-      <p class="text-lg mt-4 text-purple-300">
-        Aplikasi yang membuat kesehatan jadi lebih menyenangkan!
-      </p>
-    </header>
-
-    <!-- Navbar di Pojok Kanan Atas -->
-    <div class="absolute top-0 right-0 m-4">
-      {% if user.is_authenticated %}
-      <div class="relative inline-block text-left">
-        <button
-          class="flex items-center space-x-2 focus:outline-none"
-          onclick="toggleDropdown()"
-        >
-          {% if user.userprofile.profile_picture %}
-          <img
-            src="{{ user.userprofile.profile_picture.url }}"
-            alt="Profile Picture"
-            class="w-12 h-12 rounded-full border-2 border-white"
-          />
-          {% else %}
-          <img
-            src="/media/profile_pics/default.jpg"
-            alt="Foto Default"
-            class="w-12 h-12 rounded-full border-2 border-white"
-          />
-          {% endif %}
-          <span>{{ user.username }}</span>
-        </button>
-
-        <!-- Dropdown Menu -->
-        <div
-          id="profileDropdown"
-          class="absolute right-0 mt-2 w-48 bg-purple-800 text-white rounded-lg shadow-lg py-2 hidden"
-        >
-          <a
-            href="{% url 'profile' %}"
-            class="block px-4 py-2 hover:bg-purple-700"
-            >Profil</a
-          >
-          <a
-            href="{% url 'logout' %}"
-            class="block px-4 py-2 hover:bg-purple-700"
-            >Logout</a
-          >
-        </div>
-
-        <p class="text-sm text-white mt-4">
-          ⭐ Level: <strong>{{ user.userprofile.level }}</strong> | 🎯 EXP:
-          <strong>{{ user.userprofile.exp }}</strong>
-        </p>
-      </div>
-      {% endif %}
-    </div>
-
-    <!-- JavaScript untuk Dropdown -->
-    <script>
-      function toggleDropdown() {
-        const dropdown = document.getElementById("profileDropdown");
-        dropdown.classList.toggle("hidden");
-      }
-
-      window.onclick = function (event) {
-        if (!event.target.closest("button")) {
-          const dropdowns = document.getElementById("profileDropdown");
-          dropdowns.classList.add("hidden");
+  <!DOCTYPE html>
+  <html lang="id">
+    <head>
+      <meta charset="UTF-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <title>PlayDo</title>
+      <script src="https://cdn.tailwindcss.com"></script>
+      <style>
+        body {
+          background: url("https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0")
+            no-repeat center center fixed;
+          background-size: cover;
         }
-      };
-    </script>
+      </style>
+    </head>
+    <body
+      class="bg-gradient-to-br from-purple-900 to-black text-white font-sans leading-normal tracking-normal min-h-screen"
+    >
+      <!-- Header dengan Animasi -->
+      <header class="text-center py-8 animate-pulse">
+        <h1 class="text-5xl font-extrabold text-purple-400">
+          🎮 Selamat Datang di PlayDo!
+        </h1>
+        <p class="text-lg mt-4 text-purple-300">
+          Aplikasi yang membuat kesehatan jadi lebih menyenangkan!
+        </p>
+      </header>
 
-    <!-- Main Section -->
-    <main class="p-12 text-center">
-      <h2 class="text-4xl font-bold text-purple-300 mb-8">
-        💡 Tentang Aplikasi Ini
-      </h2>
-      <p class="text-lg mb-8 text-purple-200">
-        Aplikasi ini dirancang untuk membuat rutinitas sehat menjadi lebih seru
-        dengan sistem gamifikasi berbasis poin, level, dan tugas harian. Dengan
-        PlayDo, kamu dapat mencatat progres harian, membuat tugas personal, dan
-        bersaing dalam leaderboard mingguan.
-      </p>
+      <!-- ✅ Navbar di Pojok Kanan Atas dengan Dropdown Aktif -->
+      <div class="absolute top-0 right-0 m-4">
+        {% if user.is_authenticated %}
+        <!-- ✅ Tambahkan elemen yang mengontrol dropdown -->
+        <div class="relative inline-block text-left">
+          <button
+            class="flex items-center space-x-2 focus:outline-none"
+            onclick="toggleDropdown()"
+          >
+            <!-- ✅ Menampilkan Foto Profil -->
+            {% if user.userprofile.profile_picture %}
+            <img
+              src="{{ user.userprofile.profile_picture.url }}"
+              alt="Profile Picture"
+              class="w-12 h-12 rounded-full border-2 border-white"
+              style="margin:5px;"
+            />
+            {% else %}
+            <img
+              src="/media/profile_pics/default.jpg"
+              alt="Foto Default"
+              class="w-12 h-12 rounded-full border-2 border-white"
+            />
+            {% endif %}
+            <span>{{ user.username }}</span>
+          </button>
 
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <a href="{% url 'task_list' %}" class="block">
+          <!-- ✅ Dropdown Menu -->
           <div
-            class="bg-purple-800 text-white p-6 rounded-lg shadow-lg transform transition duration-300 hover:scale-105 hover:shadow-2xl hover:ring-4 hover:ring-purple-500"
+            id="profileDropdown"
+            class="absolute right-0 mt-2 w-48 bg-purple-800 text-white rounded-lg shadow-lg py-2 hidden"
           >
-            <h3 class="text-2xl font-bold">🎯 Tugas Harian</h3>
-            <p class="mt-4 text-purple-200">
-              Selesaikan tugas-tugas harian dan raih poin untuk naik level.
-              Jadikan setiap hari penuh produktivitas!
-            </p>
+            <a
+              href="{% url 'profile' %}"
+              class="block px-4 py-2 hover:bg-purple-700"
+              >Profil</a
+            >
+            <a
+              href="{% url 'logout' %}"
+              class="block px-4 py-2 hover:bg-purple-700"
+              >Logout</a
+            >
           </div>
-        </a>
-        <a href="{% url 'create_custom_task' %}" class="block">
-          <div
-            class="bg-purple-800 text-white p-6 rounded-lg shadow-lg transform transition duration-300 hover:scale-105 hover:shadow-2xl hover:ring-4 hover:ring-purple-500"
-          >
-            <h3 class="text-2xl font-bold">Tugas Custom</h3>
-            <p class="mt-4 text-purple-200">
-              Buat tugas sesuai keinginanmu! Atur target spesifik dan rasakan
-              motivasi yang lebih besar.
-            </p>
-          </div>
-        </a>
 
-        <!-- Card 3 - Leaderboard Mingguan -->
-        <a href="{% url 'leaderboard' %}" class="block">
-          <div
-            class="bg-purple-800 text-white p-6 rounded-lg shadow-lg transform transition duration-300 hover:scale-105 hover:shadow-2xl hover:ring-4 hover:ring-purple-500"
-          >
-            <h3 class="text-2xl font-bold mb-4">🏆 Leaderboard Mingguan</h3>
-            <p class="mt-4 text-purple-200">
-              Bersaing dengan pengguna lain dan raih peringkat teratas! Jadilah
-              bintang minggu ini.
-            </p>
-          </div>
-        </a>
+          <p class="text-sm text-white mt-4">
+            ⭐ Level: <strong>{{ user.userprofile.level }}</strong> | 🎯 EXP:
+            <strong>{{ user.userprofile.exp }}</strong>
+          </p>
+        </div>
+        {% endif %}
       </div>
-    </main>
 
-    <!-- Footer -->
-    <footer class="bg-purple-900 text-center p-6 text-white">
-      <p>&copy; 2025 Gamification "PlayDo". All Rights Reserved.</p>
-      <p class="mt-2">Tetap termotivasi, sehat, dan aktif bersama PlayDo!</p>
-    </footer>
-  </body>
-</html>
+      <!-- ✅ JavaScript untuk Mengontrol Dropdown -->
+      <script>
+        function toggleDropdown() {
+          const dropdown = document.getElementById("profileDropdown");
+          dropdown.classList.toggle("hidden");
+        }
+
+        // Menutup dropdown saat klik di luar area dropdown
+        window.onclick = function (event) {
+          if (!event.target.closest("button")) {
+            const dropdowns = document.getElementById("profileDropdown");
+            dropdowns.classList.add("hidden");
+          }
+        };
+      </script>
+
+      <!-- Main Section dengan Animasi dan Card -->
+      <section class="p-12 text-center">
+        <h2 class="text-4xl font-bold text-purple-300 mb-8">
+          💡 Tentang Proyek Ini
+        </h2>
+        <p class="text-lg mb-8 text-purple-200">
+          Aplikasi ini dirancang untuk membuat rutinitas sehat menjadi lebih seru
+          dengan sistem gamifikasi berbasis poin, level, dan tugas harian.
+        </p>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <a href="{% url 'task_list' %}" class="block">
+            <div
+              class="bg-purple-800 text-white p-6 rounded-lg shadow-lg transform transition duration-300 hover:scale-105 hover:shadow-2xl hover:ring-4 hover:ring-purple-500"
+            >
+              <h3 class="text-2xl font-bold">🎯 Tugas Harian</h3>
+              <p class="mt-4 text-purple-200">
+                Selesaikan tugas-tugas harian dan raih poin untuk naik level.
+              </p>
+            </div>
+          </a>
+          <a href="{% url 'create_custom_task' %}" class="block">
+            <div
+              class="bg-purple-800 text-white p-6 rounded-lg shadow-lg transform transition duration-300 hover:scale-105 hover:shadow-2xl hover:ring-4 hover:ring-purple-500"
+            >
+              <h3 class="text-2xl font-bold">Tugas Custom</h3>
+              <p class="mt-4 text-purple-200">
+                Buat tugas kamu yang sesuai dengan kebutuhanmu disini!
+              </p>
+            </div>
+          </a>
+
+          <!-- Card 3 - Leaderboard Mingguan -->
+          <a href="{% url 'leaderboard' %}" class="block">
+            <div class="bg-purple-800 text-white p-6 rounded-lg shadow-lg transform transition duration-300 hover:scale-105 hover:shadow-2xl hover:ring-4 hover:ring-purple-500"
+            >
+              <h3 class="text-2xl font-bold mb-4">🏆 Leaderboard Mingguan</h3>
+              <p class="mt-4 text-purple-200">
+                Peringkat tertinggi minggu ini!
+              </p>
+            </div>
+          </a>
+        </div>
+      </section>
+
+      <!-- Footer -->
+      <footer class="bg-purple-900 text-center p-6 text-white mt-16">
+        <p>&copy; 2025 Gamification Project "PlayDo". All Rights Reserved.</p>
+      </footer>
+    </body>
+  </html>
