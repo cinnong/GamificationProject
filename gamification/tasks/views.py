@@ -2,7 +2,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth import login, authenticate, logout
 from django.http import HttpResponse
 from rest_framework import viewsets
-from .models import Task, DailyTask, CustomTask, UserProfile, Achievement, UserAchievement, Notification
+from .models import Task, CustomTask, UserProfile, UserTaskCompletion, UserCustomTaskCompletion
 from .serializers import TaskSerializer, UserProfileSerializer
 from .forms import CustomTaskForm, UserRegisterForm, UserLoginForm
 from django.contrib.auth.views import LoginView
@@ -13,6 +13,8 @@ from django.contrib import messages
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.timezone import now
 from django.db.models import Sum
+from django.utils import timezone
+from django.db import models
 
 
 class TaskViewSet(viewsets.ModelViewSet):
@@ -61,16 +63,11 @@ def user_login(request):
 def index(request):
     
     try:
-        user_profile = request.user.userprofile
+        userprofile = request.user
     except UserProfile.DoesNotExist:
         messages.error(request, "Profil tidak ditemukan, silakan registrasi ulang.")
         return redirect('register')
-    return render(request, 'index.html', {'user_profile': user_profile})
-
-    # Menambahkan top_players untuk leaderboard
-    top_players = UserProfile.objects.select_related('user').order_by('-exp')[:5]
-
-    return render(request, 'index.html', {'user_profile': user_profile, 'top_players': top_players})
+    return render(request, 'index.html', {'user': userprofile})
 
 
 
@@ -78,69 +75,58 @@ def user_logout(request):
     logout(request)
     return redirect('login')
 
-@csrf_exempt 
+@csrf_exempt
+@login_required
 def complete_task(request, task_id):
-    try:
-        # Cek apakah task merupakan DailyTask atau CustomTask
-        task = DailyTask.objects.get(id=task_id)
-        print("something")
-        
-        if task.is_completed:
-            messages.warning(request, "Tugas ini sudah selesai sebelumnya.")
-            return redirect('task_list')
+    task = get_object_or_404(Task, id=task_id)
+    user_profile = request.user.userprofile
 
-        # Tandai sebagai selesai
-        task.is_completed = True    
-        task.save()
+    # Check if the task has already been completed by the user
+    if UserTaskCompletion.objects.filter(user=user_profile, task=task).exists():
+        messages.warning(request, "Tugas ini sudah selesai sebelumnya.")
+        return redirect('task_list')
 
-        # Update EXP dan Coins hanya jika DailyTask
-        user_profile = task.user
-        user_profile.add_exp(task.task.exp_reward)
-        user_profile.add_coins(task.task.coin_reward)
-        user_profile.save()
-        print(user_profile)
-        messages.success(request, f"Tugas '{task.task.title}' selesai! Kamu mendapatkan {task.task.exp_reward} EXP dan {task.task.coin_reward} koin!")
-    except DailyTask.DoesNotExist:
-        try:
-            # Jika bukan DailyTask, cek CustomTask
-            task = CustomTask.objects.get(id=task_id)
-            task.is_completed = True
-            task.save()
-            messages.success(request, f"Tugas custom '{task.title}' berhasil diselesaikan!")
-        except CustomTask.DoesNotExist:
-            messages.error(request, "Tugas tidak ditemukan.")
-        
+    # Mark the task as completed for the user
+    UserTaskCompletion.objects.create(user=user_profile, task=task)
+    user_profile.add_exp(task.exp_reward)
+    user_profile.save()
+    messages.success(request, f"Tugas '{task.title}' selesai! Kamu mendapatkan {task.exp_reward} EXP!")
+
     return redirect('task_list')
 
 
-from .models import Task, DailyTask, CustomTask, UserProfile
+from .models import Task, CustomTask, UserProfile
+import random
 
+@login_required
 def task_list(request):
-    from .models import Task
     difficulty_filter = request.GET.get('difficulty', None)
+    user_profile = request.user.userprofile
 
-    # Fetch all DailyTasks and CustomTasks without user filtering
-    daily_tasks = DailyTask.objects.all().distinct()
-    custom_tasks = CustomTask.objects.filter(user=request.user.userprofile).distinct()
+    easy_tasks = list(Task.objects.filter(difficulty='easy').order_by('created_at')[:2])
+    medium_tasks = list(Task.objects.filter(difficulty='medium').order_by('created_at')[:2])
+    hard_tasks = list(Task.objects.filter(difficulty='hard').order_by('created_at')[:1])
+    
+    tasks = easy_tasks + medium_tasks + hard_tasks
+    random.shuffle(tasks)
+    
+    tasks = Task.objects.all().distinct()
+    custom_tasks = CustomTask.objects.filter(user=user_profile).distinct()
 
     if difficulty_filter:
-        daily_tasks = daily_tasks.filter(task__difficulty=difficulty_filter)
+        tasks = tasks.filter(difficulty=difficulty_filter)
+        
+    completed_tasks = UserTaskCompletion.objects.filter(user=user_profile).values_list('task_id', flat=True)
 
     # Send the choices from Task model
     difficulty_choices = Task.DIFFICULTY_CHOICES
     
     return render(request, 'task_list.html', {
-        'tasks': daily_tasks,
+        'tasks': tasks,
         'custom_tasks': custom_tasks,
-        'difficulty_choices': difficulty_choices
+        'difficulty_choices': difficulty_choices,
+        'completed_tasks': completed_tasks
     })
-
-
-
-
-
-
-
 
 def create_custom_task(request):        
     if request.method == 'POST':
@@ -159,14 +145,43 @@ def delete_custom_task(request, task_id):
     task.delete()
     return redirect('task_list')
 
-def leaderboard(request):
-    today = now().date()
-    # Filter user dengan exp yang bertambah dalam 7 hari terakhir
-    top_users = UserProfile.objects.annotate(
-        total_exp=Sum('exp')
-    ).order_by('-exp')[:5]
+@csrf_exempt
+@login_required
+def complete_custom_task(request, task_id):
+    custom_task = get_object_or_404(CustomTask, id=task_id)
+    user_profile = request.user.userprofile
 
-    return render(request, 'tasks/leaderboard.html', {'top_users': top_users})
+    # Check if the custom task has been validated
+    if not custom_task.is_validated:
+        messages.warning(request, "Tugas custom ini belum divalidasi oleh moderator.")
+        return redirect('task_list')
+
+    # Check if the custom task has already been completed by the user
+    if UserCustomTaskCompletion.objects.filter(user=user_profile, task=custom_task).exists():
+        messages.warning(request, "Tugas custom ini sudah selesai sebelumnya.")
+        return redirect('task_list')
+
+    # Mark the custom task as completed for the user
+    UserCustomTaskCompletion.objects.create(user=user_profile, task=custom_task)
+    custom_task.is_completed = True
+    custom_task.save()
+    user_profile.add_exp(custom_task.exp_reward)
+    user_profile.save()
+    messages.success(request, f"Tugas custom '{custom_task.title}' selesai! Kamu mendapatkan {custom_task.exp_reward} EXP!")
+
+    # Schedule the custom task for deletion after 12 hours
+    custom_task.schedule_deletion()
+
+    return redirect('task_list')
+
+@login_required
+def leaderboard(request):
+    # Fetch users ordered by level, exp, and finished task time
+    users = UserProfile.objects.annotate(
+        last_task_time=models.Max('usertaskcompletion__completed_at')
+    ).order_by('-level', '-exp', 'last_task_time')[:10]
+
+    return render(request, 'leaderboard.html', {'users': users})
 
 
 @login_required

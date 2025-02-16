@@ -1,13 +1,14 @@
 from django.conf import settings
 from django.urls import path
 from . import views
+from .views import leaderboard
 from django.conf.urls.static import static
 from django.contrib import admin
 
 urlpatterns = [
     path('', views.index, name='index'),
-    # urls.py
     path('complete/<int:task_id>/', views.complete_task, name='complete_task'),
+    path('complete_custom_task/<int:task_id>/', views.complete_custom_task, name='complete_custom_task'),
     path('task_list/', views.task_list, name='task_list'),
     path('tasks/delete/<int:task_id>/', views.delete_custom_task, name='delete_custom_task'),
     path('create/', views.create_custom_task, name='create_custom_task'),
@@ -17,5 +18,6 @@ urlpatterns = [
     path('logout/', views.user_logout, name='logout'),
     path('profile/', views.profile_view, name='profile'),
     path('admin/', admin.site.urls),
+    path('leaderboard/', leaderboard, name='leaderboard'),
     
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

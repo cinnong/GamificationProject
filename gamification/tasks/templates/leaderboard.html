@@ -1,14 +1,60 @@
 <!DOCTYPE html>
-<html>
-<head>
-    <title>Leaderboard</title>
-</head>
-<body>
-    <h1>Leaderboard</h1>
-    <ul>
-        {% for user in top_users %}
-            <li>{{ user.user.username }} - {{ user.exp }} EXP</li>
-        {% endfor %}
-    </ul>
-</body>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Leaderboard - PlayDo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body
+    class="bg-gradient-to-br from-gray-900 to-black min-h-screen flex items-center justify-center font-sans text-gray-100"
+  >
+    <div class="container mx-auto p-4">
+      <h1 class="text-4xl font-extrabold text-center text-purple-400 mb-6">
+        Leaderboard
+      </h1>
+      <table class="min-w-full bg-white text-black rounded-lg shadow-lg">
+        <thead>
+          <tr>
+            <th class="py-2 px-4 border-b">Username</th>
+            <th class="py-2 px-4 border-b">Level</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for user in users %}
+          <tr>
+            <td class="py-2 px-4 border-b flex items-center space-x-4">
+              {% if user.profile_picture %}
+              <img
+                src="{{ user.profile_picture.url }}"
+                alt="Profile Picture"
+                class="w-10 h-10 rounded-full border-2 border-purple-500 object-cover shadow-lg"
+              />
+              {% else %}
+              <img
+                src="/media/profile_pics/default.jpg"
+                alt="Default Profile Picture"
+                class="w-10 h-10 rounded-full border-2 border-purple-500 object-cover shadow-lg"
+              />
+              {% endif %}
+              <span>{{ user.user.username }}</span>
+            </td>
+            <td class="py-2 px-4 border-b">{{ user.level }}</td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="2" class="py-2 px-4 text-center">No users found.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <div class="mt-4">
+        <a
+          href="{% url 'index' %}"
+          class="block px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition duration-300"
+          >Back to Home</a
+        >
+      </div>
+    </div>
+  </body>
 </html>

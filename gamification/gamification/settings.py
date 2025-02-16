@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'tasks',
     'rest_framework',
+    'django_resized',
     
 ]
 
@@ -88,7 +89,7 @@ WSGI_APPLICATION = 'gamification.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-       'NAME': 'test_db',
+       'NAME': 'gamification',
        'USER': 'postgres',
        'PASSWORD': 'dina2004',
        'HOST': 'localhost',

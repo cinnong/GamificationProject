@@ -1,0 +1,14 @@
+[run]
+plugins = 
+    django_coverage_plugin
+source = .
+omit =
+    */migrations/*
+    */tests/*
+    */templates/*
+    manage.py
+    asgi.py
+    wsgi.py
+
+[report]
+show_missing = True
